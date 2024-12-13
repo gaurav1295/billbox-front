@@ -1,16 +1,19 @@
-import { ExpenseCard } from '@/components/dashboard/expense-card'
-import { RecentTransactions } from '@/components/dashboard/recent-transactions'
-import { MonthlyActivityChart } from '@/components/dashboard/monthly-activity-chart'
-import { ExpenseStatistics } from '@/components/dashboard/expense-statistics'
-import { QuickLinks } from '@/components/dashboard/quick-links'
+import { Sidebar } from './sidebar'
+import { ExpenseCard } from '../components/expense-card'
+import { RecentTransactions } from './recent-transactions'
+import { MonthlyActivityChart } from '../components/monthly-activity-chart'
+import { ExpenseStatistics } from '../components/expense-statistics'
+import { QuickLinks } from './quick-links'
 import { Input } from "@/components/ui/input"
 import { Bell, Settings } from 'lucide-react'
 import Image from 'next/image'
 
 export default function Dashboard() {
-    return (
-      <>
-        <header className="bg-white p-4 flex justify-between items-center border-b">
+  return (
+    <div className="flex h-screen bg-gray-100">
+      <Sidebar />
+      <div className="flex-1 overflow-auto">
+        <header className="bg-white p-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold">Overview</h1>
           <div className="flex items-center space-x-4">
             <Input type="search" placeholder="Search for something" className="w-64" />
@@ -43,6 +46,8 @@ export default function Dashboard() {
             <QuickLinks />
           </div>
         </main>
-      </>
-    )
-  }
+      </div>
+    </div>
+  )
+}
+

@@ -1,124 +1,137 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-"use client";
+'use client'
 
-import { useState } from "react";
-import { useSignIn } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-  CardFooter,
-} from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Eye, EyeOff } from "lucide-react";
+import * as React from 'react'
+// import { useSignIn } from '@clerk/nextjs'
+// import {  PhoneCodeFactor, SignInFirstFactor } from '@clerk/types'
+// import { useRouter } from 'next/navigation'
+import { CarouselDemo } from '@/components/login/carousel'
+import { SignUpForm } from '@/components/login/login-signup'
+import { Link, MessageSquare } from 'lucide-react'
 
-export default function SignIn() {
-  const { isLoaded, signIn, setActive } = useSignIn();
-  const [emailAddress, setEmailAddress] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const router = useRouter();
+export default function Page() {
+  // const { isLoaded, signIn, setActive } = useSignIn()
+  // // const [verifying, setVerifying] = React.useState(false)
+  // // const [phone, setPhone] = React.useState('')
+  // const [code, setCode] = React.useState('')
+  // const router = useRouter()
 
-  if (!isLoaded) {
-    return null;
-  }
+  // async function handleSubmit(e: React.FormEvent) {
+  //   e.preventDefault()
 
-  async function submit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!isLoaded) {
-      return;
-    }
+  //   if (!isLoaded && !signIn) return null
 
-    try {
-      const result = await signIn.create({
-        identifier: emailAddress,
-        password,
-      });
+  //   try {
+  //     // Start the sign-in process using the phone number method
+  //     const { supportedFirstFactors } = await signIn.create({
+  //       identifier: phone,
+  //     })
 
-      if (result.status === "complete") {
-        await setActive({ session: result.createdSessionId });
-        router.push("/dashboard");
-      } else {
-        console.error(JSON.stringify(result, null, 2));
-      }
-    } catch (err: any) {
-      console.error("error", err.errors[0].message);
-      setError(err.errors[0].message);
-    }
-  }
+  //     // Filter the returned array to find the 'phone_code' entry
+  //     const isPhoneCodeFactor = (factor: SignInFirstFactor): factor is PhoneCodeFactor => {
+  //       return factor.strategy === 'phone_code'
+  //     }
+  //     const phoneCodeFactor = supportedFirstFactors?.find(isPhoneCodeFactor)
+
+  //     if (phoneCodeFactor) {
+  //       // Grab the phoneNumberId
+  //       const { phoneNumberId } = phoneCodeFactor
+
+  //       // Send the OTP code to the user
+  //       await signIn.prepareFirstFactor({
+  //         strategy: 'phone_code',
+  //         phoneNumberId,
+  //       })
+
+  //       // Set verifying to true to display second form
+  //       // and capture the OTP code
+  //       setVerifying(true)
+  //     }
+  //   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  //   } catch (err: any) {
+  //     // See https://clerk.com/docs/custom-flows/error-handling
+  //     // for more info on error handling
+  //     console.error('Error:', JSON.stringify(err, null, 2))
+  //     if (err.status == 422) {
+  //       router.push('sign-up')
+  //     }
+  //   }
+  // }
+
+  // async function handleVerification(e: React.FormEvent) {
+  //   e.preventDefault()
+
+  //   if (!isLoaded && !signIn) return null
+
+  //   try {
+  //     // Use the code provided by the user and attempt verification
+  //     const signInAttempt = await signIn.attemptFirstFactor({
+  //       strategy: 'phone_code',
+  //       code,
+  //     })
+
+  //     // If verification was completed, set the session to active
+  //     // and redirect the user
+  //     if (signInAttempt.status === 'complete') {
+  //       await setActive({ session: signInAttempt.createdSessionId })
+
+  //       router.push('/')
+  //     } else {
+  //       // If the status is not complete, check why. User may need to
+  //       // complete further steps.
+  //       console.error(signInAttempt)
+  //     }
+  //   } catch (err) {
+  //     // See https://clerk.com/docs/custom-flows/error-handling
+  //     // for more info on error handling
+  //     console.error('Error:', JSON.stringify(err, null, 2))
+  //   }
+  // }
+
+  // if (verifying) {
+  //   return (
+  //     <>
+  //       <h1>Verify your phone number</h1>
+  //       <form onSubmit={handleVerification}>
+  //         <label htmlFor="code">Enter your verification code</label>
+  //         <input value={code} id="code" name="code" onChange={(e) => setCode(e.target.value)} />
+  //         <button type="submit">Verify</button>
+  //       </form>
+  //     </>
+  //   )
+  // }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold text-center">
-            Sign In to Todo Master
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={submit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                type="email"
-                id="email"
-                value={emailAddress}
-                onChange={(e) => setEmailAddress(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Input
-                  type={showPassword ? "text" : "password"}
-                  id="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2"
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4 text-gray-500" />
-                  ) : (
-                    <Eye className="h-4 w-4 text-gray-500" />
-                  )}
-                </button>
-              </div>
-            </div>
-            {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-            <Button type="submit" className="w-full">
-              Sign In
-            </Button>
-          </form>
-        </CardContent>
-        <CardFooter className="justify-center">
-          <p className="text-sm text-muted-foreground">
-            Don&apos;t have an account?{" "}
-            <Link
-              href="/sign-up"
-              className="font-medium text-primary hover:underline"
-            >
-              Sign up
-            </Link>
-          </p>
-        </CardFooter>
-      </Card>
+    <div className="min-h-screen grid lg:grid-cols-2">
+      {/* Left Section - Preview */}
+      <div className="hidden lg:flex bg-blue-500 text-white flex-col items-center justify-center relative p-8">
+        <h2 className="text-3xl font-bold text-center mb-8 max-w-2xl">
+          Social media shared today, tomorrow or by location
+        </h2>
+        <div className="w-full max-w-2xl">
+          <CarouselDemo />
+        </div>
+      </div>
+
+      {/* Right Section - Form */}
+      <div className='m-auto p-4'>
+        <FormSection />
+      </div>
     </div>
-  );
+  )
+}
+
+function FormSection() {
+  return (
+    <div className="flex flex-col items-center justify-center p-4 sm:p-8 w-[400] h-[500]">
+        <div className="w-full max-w-md space-y-8">
+          <div className="flex justify-center lg:justify-start">
+          <Link className="flex items-center justify-center mb-6" href="/">
+            <MessageSquare className="h-12 w-12 text-blue-400" />
+            <span className="ml-6 text-4xl font-medium">Billbox</span>
+           </Link>
+          </div>
+          <SignUpForm />
+        </div>
+    </div>
+  )
 }
