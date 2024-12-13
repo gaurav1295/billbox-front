@@ -1,39 +1,33 @@
-'use client'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { Home, FileText, RefreshCw, PiggyBank, Gift, Settings } from 'lucide-react'
-import { cn } from "@/lib/utils"
+import { Home, FileText, RefreshCw, PiggyBank, BarChart2, Settings } from 'lucide-react'
 
-const menuItems = [
+const navItems = [
   { icon: Home, label: 'Dashboard', href: '/' },
   { icon: FileText, label: 'Bills', href: '/bills' },
   { icon: RefreshCw, label: 'Reimbursement', href: '/reimbursement' },
   { icon: PiggyBank, label: 'Tax Saving', href: '/tax-saving' },
-  { icon: Gift, label: 'My Privileges', href: '/privileges' },
-  { icon: Settings, label: 'Setting', href: '/settings' },
+  { icon: BarChart2, label: 'Reports', href: '/reports' },
+  { icon: Settings, label: 'Settings', href: '/settings' },
 ]
 
 export function Sidebar() {
-  const pathname = usePathname()
-
   return (
-    <div className="w-60 bg-white p-4 h-screen flex flex-col">
-      <div className="flex items-center mb-8">
-        <FileText className="h-8 w-8 text-blue-600" />
-        <span className="text-xl font-bold ml-2">BillBox</span>
+    <div className="w-64 border-r bg-white h-screen">
+      <div className="p-6">
+        <Link href="/" className="flex items-center gap-2 text-2xl font-semibold text-blue-600">
+          <span className="text-3xl">📦</span>
+          Billbox
+        </Link>
       </div>
-      <nav className="flex-1">
-        {menuItems.map((item) => (
+      <nav className="px-4">
+        {navItems.map((item) => (
           <Link
             key={item.href}
             href={item.href}
-            className={cn(
-              "flex items-center p-2 rounded-lg mb-2 cursor-pointer",
-              pathname === item.href ? "bg-blue-100 text-blue-600" : "text-gray-500 hover:bg-gray-100"
-            )}
+            className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg"
           >
-            <item.icon className="h-5 w-5 mr-3" />
-            <span className="text-sm">{item.label}</span>
+            <item.icon className="w-5 h-5" />
+            <span>{item.label}</span>
           </Link>
         ))}
       </nav>

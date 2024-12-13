@@ -6,11 +6,10 @@ export default function Layout({
     children: React.ReactNode
   }) {
     return (
-        <>
-        <Sidebar/>
-        <div>asdasdsadasdas</div>
-        {children}
-        </>
+        <div className="flex h-screen">
+          <Sidebar/>
+          <div className="flex-1 p-4 overflow-y-auto">{children}</div>
+        </div>
       
     )
   }
