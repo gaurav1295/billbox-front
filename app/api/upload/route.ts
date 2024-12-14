@@ -31,14 +31,13 @@ export async function POST(req: NextRequest) {
       },
       body: externalFormData,
     });
+    const data = await externalApiResponse.json()
 
     if (!externalApiResponse.ok) {
       const errorResponse = await externalApiResponse.text();
       throw new Error(`External API upload failed: ${errorResponse}`);
     }
-
-    const externalApiData = await externalApiResponse.json();
-    return NextResponse.json({ fileId: externalApiData.fileId });
+    return NextResponse.json({data: data.body});
   } catch (error) {
     console.error('Upload error:', error);
     return NextResponse.json(
