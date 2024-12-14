@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { Upload, FileText, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -23,23 +23,54 @@ interface MultiStepUploadProps {
 
 export function MultiStepUpload({ isOpen, onClose }: MultiStepUploadProps) {
   const [currentStep, setCurrentStep] = useState<UploadStep>(1)
-//   const [fileStatus, setFileStatus] = useState<FileStatus>('idle')
+  // const [fileStatus, setFileStatus] = useState<FileStatus>('idle')
   const [selectedFile, setSelectedFile] = useState<UploadedFile | null>(null)
   const [uploadProgress, setUploadProgress] = useState(0)
+  const [isDragging, setIsDragging] = useState(false)
   const { toast } = useToast()
 
-  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFile = useCallback((file: File) => {
+    setSelectedFile({
+      name: file.name,
+      size: `${(file.size / 1024).toFixed(0)}kb`,
+      type: file.type,
+    })
+    // setFileStatus('selected')
+    setCurrentStep(2)
+    handleUpload(file)
+  }, [])
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
-    console.log(file)
     if (file) {
-      setSelectedFile({
-        name: file.name,
-        size: `${(file.size / 1024).toFixed(0)}kb`,
-        type: file.type,
-      })
-    //   setFileStatus('selected')
-      setCurrentStep(2)
-      await handleUpload(file)
+      handleFile(file)
+    }
+  }
+
+  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(true)
+  }
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(false)
+  }
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+  }
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(false)
+    const file = e.dataTransfer.files?.[0]
+    if (file) {
+      handleFile(file)
     }
   }
 
@@ -49,7 +80,7 @@ export function MultiStepUpload({ isOpen, onClose }: MultiStepUploadProps) {
     setUploadProgress(0)
 
     const formData = new FormData()
-    formData.append('image', file)
+    formData.append('file', file)
 
     try {
       const response = await fetch('/api/upload', {
@@ -77,7 +108,7 @@ export function MultiStepUpload({ isOpen, onClose }: MultiStepUploadProps) {
       }
 
       const data = await response.json()
-    //   setFileStatus('completed')
+      // setFileStatus('completed')
       setCurrentStep(4)
 
       if (file.type.startsWith('image/')) {
@@ -122,7 +153,7 @@ export function MultiStepUpload({ isOpen, onClose }: MultiStepUploadProps) {
         resetUpload()
       }
     }}>
-      <DialogContent className="sm:max-w-md bg-white">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Media Upload</DialogTitle>
         </DialogHeader>
@@ -132,20 +163,28 @@ export function MultiStepUpload({ isOpen, onClose }: MultiStepUploadProps) {
           </div>
 
           {currentStep === 1 && (
-            <div className="border-2 border-dashed rounded-lg p-6 text-center space-y-4">
+            <div 
+              className={`border-2 ${isDragging ? 'border-blue-500 bg-blue-50' : 'border-dashed'} rounded-lg p-6 text-center space-y-4 transition-colors duration-300`}
+              onDragEnter={handleDragEnter}
+              onDragLeave={handleDragLeave}
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+            >
               <div className="flex flex-col items-center gap-2">
-                <Upload className="h-8 w-8 text-blue-500" />
+                <Upload className={`h-8 w-8 ${isDragging ? 'text-blue-500' : 'text-gray-400'}`} />
                 <div className="flex gap-1">
-                  <span>Drag your file(s) or</span>
-                  <label className="text-blue-500 cursor-pointer hover:underline">
-                    browse
-                    <input
-                      type="file"
-                      className="hidden"
-                      onChange={handleFileSelect}
-                      accept=".jpg,.jpeg,.png,.svg,.gif,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
-                    />
-                  </label>
+                  <span>{isDragging ? 'Drop your file here' : 'Drag your file(s) or'}</span>
+                  {!isDragging && (
+                    <label className="text-blue-500 cursor-pointer hover:underline">
+                      browse
+                      <input
+                        type="file"
+                        className="hidden"
+                        onChange={handleFileSelect}
+                        accept=".jpg,.jpeg,.png,.svg,.gif,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
+                      />
+                    </label>
+                  )}
                 </div>
                 <span className="text-sm text-muted-foreground">
                   Max 10 MB files are allowed
