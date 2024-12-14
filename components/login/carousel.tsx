@@ -7,15 +7,16 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
+  // CarouselNext,
+  // CarouselPrevious,
 } from "@/components/ui/carousel"
 import { Button } from "@/components/ui/button"
 
 const images = [
-  'https://media.istockphoto.com/id/1413873774/photo/business-team-portrait.jpg?s=2048x2048&w=is&k=20&c=kVL_PdymCjT1F1ar0TZyie40CjV60CezUkRj5gTcqhM=',
-  'https://media.istockphoto.com/id/1413873774/photo/business-team-portrait.jpg?s=2048x2048&w=is&k=20&c=kVL_PdymCjT1F1ar0TZyie40CjV60CezUkRj5gTcqhM=',
-  'https://media.istockphoto.com/id/1413873774/photo/business-team-portrait.jpg?s=2048x2048&w=is&k=20&c=kVL_PdymCjT1F1ar0TZyie40CjV60CezUkRj5gTcqhM=',
+  ''
+  // 'https://media.istockphoto.com/id/1413873774/photo/business-team-portrait.jpg?s=2048x2048&w=is&k=20&c=kVL_PdymCjT1F1ar0TZyie40CjV60CezUkRj5gTcqhM=',
+  // 'https://media.istockphoto.com/id/1413873774/photo/business-team-portrait.jpg?s=2048x2048&w=is&k=20&c=kVL_PdymCjT1F1ar0TZyie40CjV60CezUkRj5gTcqhM=',
+  // 'https://media.istockphoto.com/id/1413873774/photo/business-team-portrait.jpg?s=2048x2048&w=is&k=20&c=kVL_PdymCjT1F1ar0TZyie40CjV60CezUkRj5gTcqhM=',
 ]
 
 export function CarouselDemo() {

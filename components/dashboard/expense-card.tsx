@@ -16,7 +16,7 @@ export function ExpenseCard({
   isPending = false,
 }: ExpenseCardProps) {
   return (
-    <div className={`rounded-xl p-6 ${isPending ? 'bg-white border' : 'bg-blue-600 text-white'}`}>
+    <div className={`rounded-xl p-4 md:p-6 ${isPending ? 'bg-white border' : 'bg-blue-600 text-white'}`}>
       <div className="flex justify-between items-start">
         <div>
           <h3 className="text-lg font-medium">{`${month} ${year}`}</h3>

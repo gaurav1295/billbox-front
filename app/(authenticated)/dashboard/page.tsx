@@ -2,10 +2,10 @@
 import { ExpenseCard } from "@/components/dashboard/expense-card"
 import { ExpenseStatistics } from "@/components/dashboard/expense-statistics"
 import { FileUpload } from "@/components/dashboard/file-upload"
+import { FloatingUploadButton } from "@/components/dashboard/floating-upload-button"
 import { Header } from "@/components/dashboard/header"
 import { MonthlyActivity } from "@/components/dashboard/statistics"
 import { TransactionsList } from "@/components/dashboard/transaction-list"
-import { Sidebar } from "lucide-react"
 
 // This is where you would replace with your API call
 async function getData() {
@@ -78,27 +78,29 @@ export default async function Dashboard() {
   const data: any = await getData()
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      <Sidebar />
+    <div className="flex flex-col md:flex-row h-screen bg-gray-50">
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header />
-        <main className="flex-1 overflow-y-auto p-8">
+        <main className="flex-1 overflow-y-auto p-4 md:p-8 pb-20 md:pb-8">
           <div className="max-w-7xl mx-auto space-y-8">
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
               {data.expenses.map((expense: any, i: any) => (
                 <ExpenseCard key={i} {...expense} />
               ))}
-              <FileUpload />
+              <div className="hidden md:block">
+                <FileUpload />
+              </div>
             </div>
             
             <TransactionsList transactions={data.transactions} />
             
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <MonthlyActivity data={data.monthlyActivity} />
               <ExpenseStatistics />
             </div>
           </div>
         </main>
+        <FloatingUploadButton />
       </div>
     </div>
   )
