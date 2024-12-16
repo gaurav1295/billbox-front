@@ -1,18 +1,6 @@
 import { Music2, Fuel, Car } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-
-interface Transaction {
-  id: string
-  icon: 'spotify' | 'fuel' | 'travel'
-  title: string
-  date: string
-  timestamp: string
-  documentId: string
-  documentType: string
-  category: string
-  subCategory: string
-  amount: number
-}
+import { BillListMeta } from '@/lib/billClient'
 
 const iconMap = {
   spotify: Music2,
@@ -26,7 +14,7 @@ const colorMap = {
   travel: 'bg-blue-100',
 }
 
-export function TransactionsList({ transactions }: { transactions: Transaction[] }) {
+export function TransactionsList({ transactions }: { transactions: BillListMeta[] }) {
   return (
     <div className="bg-white rounded-xl">
       <div className="flex items-center justify-between p-6 border-b">
@@ -35,8 +23,8 @@ export function TransactionsList({ transactions }: { transactions: Transaction[]
       </div>
       <div className="divide-y">
         {transactions.map((transaction) => {
-          const Icon = iconMap[transaction.icon]
-          const bgColor = colorMap[transaction.icon]
+          const Icon = iconMap['spotify']
+          const bgColor = colorMap['spotify']
           
           return (
             <div key={transaction.id} className="flex items-center justify-between p-6">
