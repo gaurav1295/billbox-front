@@ -59,5 +59,10 @@ const config: Config = {
   	}
   },
   plugins: [require("tailwindcss-animate")],
+  safelist: [
+    {
+      pattern: /(bg|text|border)-(blue|yellow|pink|purple)-(100|200|300|500)/,
+    },
+  ],
 };
 export default config;

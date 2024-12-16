@@ -1,15 +1,15 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, FileText, RefreshCw, PiggyBank, BarChart2, Settings } from 'lucide-react'
+import { Home, FileText } from 'lucide-react'
 
 const navItems = [
   { icon: Home, label: 'Dashboard', href: '/dashboard' },
   { icon: FileText, label: 'Bills', href: '/bills' },
-  { icon: RefreshCw, label: 'Reimbursement', href: '/reimbursement' },
-  { icon: PiggyBank, label: 'Tax Saving', href: '/tax-saving' },
-  { icon: BarChart2, label: 'Reports', href: '/reports' },
-  { icon: Settings, label: 'Settings', href: '/settings' },
+  // { icon: RefreshCw, label: 'Reimbursement', href: '/reimbursement' },
+  // { icon: PiggyBank, label: 'Tax Saving', href: '/tax-saving' },
+  // { icon: BarChart2, label: 'Reports', href: '/reports' },
+  // { icon: Settings, label: 'Settings', href: '/settings' },
 ]
 
 export function Sidebar() {

@@ -1,25 +1,25 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ExpenseCard } from "@/components/dashboard/expense-card"
-import { ExpenseStatistics } from "@/components/dashboard/expense-statistics"
-import { FileUpload } from "@/components/dashboard/file-upload"
-import { FloatingUploadButton } from "@/components/dashboard/floating-upload-button"
-import { Header } from "@/components/dashboard/header"
-import { MonthlyActivity } from "@/components/dashboard/statistics"
-import { TransactionsList } from "@/components/dashboard/transaction-list"
+import { ExpenseCard } from "@/components/dashboard/expense-card";
+import { ExpenseStatistics } from "@/components/dashboard/expense-statistics";
+import { FileUpload } from "@/components/dashboard/file-upload";
+import { FloatingUploadButton } from "@/components/dashboard/floating-upload-button";
+import { Header } from "@/components/dashboard/header";
+import { MonthlyActivity } from "@/components/dashboard/statistics";
+import { TransactionsList } from "@/components/dashboard/transaction-list";
 
 // This is where you would replace with your API call
 async function getData() {
   return {
     expenses: [
       {
-        month: 'November',
+        month: "November",
         year: 2024,
         total: 15756,
         reimbursement: 5750,
         taxSaving: 10000,
       },
       {
-        month: 'October',
+        month: "October",
         year: 2024,
         total: 10075,
         reimbursement: 2075,
@@ -29,54 +29,55 @@ async function getData() {
     ],
     transactions: [
       {
-        id: '1',
-        icon: 'spotify',
-        title: 'Spotify Subscription',
-        date: '25 Nov 2021',
-        timestamp: '06 Dec, 12.30 AM',
-        documentId: '#12548796',
-        documentType: 'PDF Upload',
-        category: 'Tax Saving',
-        subCategory: 'Books & Periodicals',
+        id: "1",
+        icon: "spotify",
+        title: "Spotify Subscription",
+        date: "25 Nov 2021",
+        timestamp: "06 Dec, 12.30 AM",
+        documentId: "#12548796",
+        documentType: "PDF Upload",
+        category: "Tax Saving",
+        subCategory: "Books & Periodicals",
         amount: 2500,
       },
       // Add more transactions here
     ],
     monthlyActivity: {
-      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+      labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
       datasets: [
         {
-          label: 'Reimbursement',
+          label: "Reimbursement",
           data: [400, 300, 200, 300, 200, 400],
-          color: 'rgba(37, 99, 235, 1)',
+          color: "rgba(37, 99, 235, 1)",
         },
         {
-          label: 'Annual Tax',
+          label: "Annual Tax",
           data: [200, 150, 100, 200, 100, 300],
-          color: 'rgba(74, 222, 128, 1)',
+          color: "rgba(74, 222, 128, 1)",
         },
       ],
     },
     expenseStats: {
-      labels: ['Others', 'Investment', 'Entertainment', 'Bill Expense'],
+      labels: ["Others", "Investment", "Entertainment", "Bill Expense"],
       datasets: [
         {
           data: [35, 20, 30, 15],
           backgroundColor: [
-            'rgba(37, 99, 235, 1)',
-            'rgba(74, 222, 128, 1)',
-            'rgba(251, 113, 133, 1)',
-            'rgba(250, 204, 21, 1)',
+            "rgba(37, 99, 235, 1)",
+            "rgba(74, 222, 128, 1)",
+            "rgba(251, 113, 133, 1)",
+            "rgba(250, 204, 21, 1)",
           ],
         },
       ],
     },
-  }
+  };
 }
 
 export default async function Dashboard() {
-  const data: any = await getData()
+  const data: any = await getData();
 
+  
   return (
     <div className="flex flex-col md:flex-row h-screen bg-gray-50">
       <div className="flex-1 flex flex-col overflow-hidden">
@@ -91,9 +92,9 @@ export default async function Dashboard() {
                 <FileUpload />
               </div>
             </div>
-            
+
             <TransactionsList transactions={data.transactions} />
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <MonthlyActivity data={data.monthlyActivity} />
               <ExpenseStatistics />
@@ -103,6 +104,5 @@ export default async function Dashboard() {
         <FloatingUploadButton />
       </div>
     </div>
-  )
+  );
 }
-
