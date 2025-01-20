@@ -15,6 +15,10 @@ const colorMap = {
 }
 
 export function TransactionsList({ transactions }: { transactions: BillListMeta[] }) {
+  if (!transactions || transactions.length <= 0) {
+    return <div>No data</div>
+  }
+  
   return (
     <div className="bg-white rounded-xl">
       <div className="flex items-center justify-between p-6 border-b">

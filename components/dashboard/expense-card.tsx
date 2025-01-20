@@ -15,6 +15,9 @@ export function ExpenseCard({
   taxSaving,
   isPending = false,
 }: ExpenseCardProps) {
+  if (!month) {
+    return <div>not found</div>
+  }
   return (
     <div className={`rounded-xl p-4 md:p-6 ${isPending ? 'bg-white border' : 'bg-blue-600 text-white'}`}>
       <div className="flex justify-between items-start">

@@ -53,7 +53,7 @@ export const getBillMonthlySumamry = async (
   return data;
 };
 
-export const getLatestBillList = async (): Promise<Array<BillListMeta>> => {
+export const getLatestBillList = async (): Promise<{bills: Array<BillListMeta>}> => {
   const { getToken } = auth();
   const token = await getToken();
 

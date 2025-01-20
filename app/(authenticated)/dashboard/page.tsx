@@ -6,36 +6,56 @@ import { FloatingUploadButton } from "@/components/dashboard/floating-upload-but
 import { Header } from "@/components/dashboard/header";
 import { MonthlyActivity } from "@/components/dashboard/statistics";
 import { TransactionsList } from "@/components/dashboard/transaction-list";
+import { ErrorBoundary } from "@/components/ErrorBoundry";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fetchDashboardData, getBillMonthlySumamry, getLatestBillList } from "@/lib/billClient";
 import { Suspense } from "react";
 
 async function ExpenseCards() {
-  const data = await getBillMonthlySumamry("bill_date", 8, 2024);
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-      <ExpenseCard {...data.currentMonthSummary} />
-      <ExpenseCard {...data.lastMonthSummary}isPending={true}  />
-      <div className="hidden md:block">
-        <FileUpload />
+  try {
+    const date = new Date()
+    const data = await getBillMonthlySumamry("bill_date", date.getMonth() + 1, date.getFullYear());
+    console.log(data)
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+        <ExpenseCard {...data.currentMonthSummary} />
+        <ExpenseCard {...data.lastMonthSummary} isPending={true} />
+        <div className="hidden md:block">
+          <FileUpload />
+        </div>
       </div>
-    </div>
-  );
+    );
+  } catch (error) {
+    throw new Error("Failed to load expense summary");
+  }
 }
 
 async function Transactions() {
-  const data = await getLatestBillList()
-  return <TransactionsList transactions={data} />;
+  try {
+    const data = await getLatestBillList();
+
+    return <TransactionsList transactions={data.bills} />;
+  } catch (error) {
+    throw new Error("Failed to load transactions");
+  }
 }
 
 async function MonthlyActivityChart() {
-  const data = await fetchDashboardData();
-  return <MonthlyActivity data={data.monthlyActivity} />;
+  try {
+    const data = await fetchDashboardData();
+    return <MonthlyActivity data={data.monthlyActivity} />;
+  } catch (error) {
+    throw new Error("Failed to load monthly activity data");
+  }
 }
 
 async function ExpenseStatsChart() {
-  // const data:any = await fetchDashboardData()
-  return <ExpenseStatistics />;
+  try {
+    // const data:any = await fetchDashboardData()
+    return <ExpenseStatistics />;
+  } catch (error) {
+    throw new Error("Failed to load expense statistics");
+  }
 }
 
 function ExpenseCardsSkeleton() {
@@ -63,21 +83,29 @@ export default async function Dashboard() {
         <Header />
         <main className="flex-1 overflow-y-auto p-4 md:p-8 pb-20 md:pb-8">
           <div className="max-w-7xl mx-auto space-y-8">
-            <Suspense fallback={<ExpenseCardsSkeleton />}>
-              <ExpenseCards />
-            </Suspense>
+            <ErrorBoundary>
+              <Suspense fallback={<ExpenseCardsSkeleton />}>
+                <ExpenseCards />
+              </Suspense>
+            </ErrorBoundary>
 
-            <Suspense fallback={<TransactionsListSkeleton />}>
-              <Transactions />
-            </Suspense>
+            <ErrorBoundary>
+              <Suspense fallback={<TransactionsListSkeleton />}>
+                <Transactions />
+              </Suspense>
+            </ErrorBoundary>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Suspense fallback={<ChartSkeleton />}>
-                <MonthlyActivityChart />
-              </Suspense>
-              <Suspense fallback={<ChartSkeleton />}>
-                <ExpenseStatsChart />
-              </Suspense>
+              <ErrorBoundary>
+                <Suspense fallback={<ChartSkeleton />}>
+                  <MonthlyActivityChart />
+                </Suspense>
+              </ErrorBoundary>
+              <ErrorBoundary>
+                <Suspense fallback={<ChartSkeleton />}>
+                  <ExpenseStatsChart />
+                </Suspense>
+              </ErrorBoundary>
             </div>
           </div>
         </main>
