@@ -1,8 +1,9 @@
-import axiosApiClient from "./apiClient";
+// import { auth } from "@clerk/nextjs/server";
+import axiosApiClient, { axiosApiClient1 } from "./apiClient";
 import { TrackingData } from "@/types/extract";
 
 type TaskCreationResponseData = {
-  requestId: string;
+  taskId: string;
   status: string;
   statusUrl: string;
   trackingData: TrackingData;
@@ -12,14 +13,18 @@ type TaskCreationResponseData = {
 export const createBillingTask = async (
   file: File
 ): Promise<TaskCreationResponseData> => {
-  const url = `api/extract/extract-text-queue`;
+  // const { getToken } = auth();
+  // const token = await getToken();
+
+  const url = `/api/extract`;
 
   const formData = new FormData();
 
   formData.append("file", file);
 
-  const { data } = await axiosApiClient.post(url, formData, {
+  const { data } = await axiosApiClient1.post(url, formData, {
     headers: {
+      // Authorization: `Bearer ${token}`,
       "Content-Type": "multipart/form-data",
     },
   });
@@ -29,11 +34,11 @@ export const createBillingTask = async (
 
 export const getTaskTrackingInfo = async (
     taskId: string
-  ): Promise<TrackingData> => {
+  ) => {
   
-    const url = `api/extract/status/:${taskId}`;
+    const url = `/api/extract/${taskId}`;
   
-    const { data } = await axiosApiClient.get(url);
+    const { data } = await axiosApiClient1.get(url);
   
     return data;
   };

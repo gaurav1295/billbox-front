@@ -10,7 +10,7 @@ interface TrackingStage {
 }
 
 interface TrackingData {
-  requestId: string
+  taskId: string
   currentStage: string
   stages: {
     fileUpload: TrackingStage
@@ -35,18 +35,18 @@ interface TrackingData {
 }
 
 interface TrackingComponentProps {
-  requestId: string
+  taskId: string
   onProgressUpdate: (progress: number) => void
   onComplete: () => void
 }
 
-export function TrackingComponent({ requestId, onProgressUpdate, onComplete }: TrackingComponentProps) {
+export function TrackingComponent({ taskId, onProgressUpdate, onComplete }: TrackingComponentProps) {
   const [trackingData, setTrackingData] = useState<TrackingData | null>(null)
 
   useEffect(() => {
     const fetchTrackingData = async () => {
       // In a real application, this would be an API call
-      const response = await mockTrackingAPI(requestId)
+      const response = await mockTrackingAPI(taskId)
       setTrackingData(response)
       onProgressUpdate(response.progress.percentageComplete)
 
@@ -58,7 +58,7 @@ export function TrackingComponent({ requestId, onProgressUpdate, onComplete }: T
     const interval = setInterval(fetchTrackingData, 2000) // Poll every 2 seconds
 
     return () => clearInterval(interval)
-  }, [requestId, onProgressUpdate, onComplete])
+  }, [taskId, onProgressUpdate, onComplete])
 
   if (!trackingData) {
     return <div>Loading...</div>
@@ -113,7 +113,7 @@ function formatDuration(duration?: number): string {
 }
 
 // Mock API function
-async function mockTrackingAPI(requestId: string): Promise<TrackingData> {
+async function mockTrackingAPI(taskId: string): Promise<TrackingData> {
   // Simulate API delay
   await new Promise((resolve) => setTimeout(resolve, 500))
 
@@ -160,7 +160,7 @@ async function mockTrackingAPI(requestId: string): Promise<TrackingData> {
 
   // Mock response data
   return {
-    requestId: requestId,
+    taskId: taskId,
     currentStage: currentStage,
     stages: stages,
     progress: {

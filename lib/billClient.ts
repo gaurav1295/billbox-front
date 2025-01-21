@@ -1,3 +1,4 @@
+import { auth } from "@clerk/nextjs/server";
 import axiosApiClient from "./apiClient";
 
 export type BillFetchCriteria = "bill_date" | "created_at";
@@ -34,24 +35,33 @@ export const getBillMonthlySumamry = async (
   month: number,
   year: number
 ): Promise<BillMonthlySummary> => {
+  const { getToken } = auth();
+  const token = await getToken();
+
   const filterString = new URLSearchParams({
     criteria,
     month: month.toString(),
     year: year.toString(),
   }).toString();
 
-  const url = `api/bill/monthly-summary?${filterString}`;
+  const url = `/bill/monthly-summary?${filterString}`;
 
-  const { data } = await axiosApiClient.get(url);
+  const { data } = await axiosApiClient.get(url, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
 
   return data;
 };
 
 export const getLatestBillList = async (): Promise<{bills: Array<BillListMeta>}> => {
+  const { getToken } = auth();
+  const token = await getToken();
 
-  const url = `api/bill/lastest-bill-list`;
+  const url = `/bill/lastest-bill-list`;
 
-  const { data } = await axiosApiClient.get(url);
+  const { data } = await axiosApiClient.get(url, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
 
   return data;
 };

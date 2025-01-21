@@ -94,7 +94,7 @@ export function MultiStepUpload({ isOpen, onClose }: MultiStepUploadProps) {
 
     try {
       const response = await createBillingTask(selectedFile.file);
-      setTaskId(response.requestId)
+      setTaskId(response.taskId)
       setTrackingData(response.trackingData);
       setUploadStep("processing");
       toast({
@@ -128,12 +128,13 @@ export function MultiStepUpload({ isOpen, onClose }: MultiStepUploadProps) {
         try {
           if (!taskId) throw 'No Task Found'
           const response = await getTaskTrackingInfo(taskId)
-          setTrackingData(response);
+          console.log(response)
+          // setTrackingData(response);
 
-          if (response.progress.percentageComplete === 100) {
-            setUploadStep("completed");
-            clearInterval(intervalId);
-          }
+          // if (response.progress.percentageComplete === 100) {
+          //   setUploadStep("completed");
+          //   clearInterval(intervalId);
+          // }
         } catch (error) {
           console.error("Error fetching tracking data:", error);
           toast({

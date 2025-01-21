@@ -15,7 +15,7 @@ export enum TaskStep {
   }
   
   export interface TrackingData {
-    requestId: string;
+    taskId: string;
     currentStage: TaskStep;
     stages: {
       fileUpload: StepStatus;
