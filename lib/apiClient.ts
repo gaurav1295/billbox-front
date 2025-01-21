@@ -1,12 +1,12 @@
 import axios from 'axios'
 
-const { API_BASE_URL } = process.env
+const { API_INTERNAL_URL } = process.env
 
 /* Axios client instance for API interactions, this set up ensures the
 base url for our api gateway will be used and also that the session cookie
 will be sent on these requests */
 const axiosApiClient = axios.create({
-  baseURL: `${API_BASE_URL}`,
+  baseURL: `${API_INTERNAL_URL}`,
   withCredentials: true,
 })
 

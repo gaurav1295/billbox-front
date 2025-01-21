@@ -15,7 +15,7 @@ async function ExpenseCards() {
   try {
     const date = new Date()
     const data = await getBillMonthlySumamry("bill_date", date.getMonth() + 1, date.getFullYear());
-    console.log(data)
+    
     return (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
         <ExpenseCard {...data.currentMonthSummary} />
@@ -26,6 +26,7 @@ async function ExpenseCards() {
       </div>
     );
   } catch (error) {
+    console.log(error)
     throw new Error("Failed to load expense summary");
   }
 }

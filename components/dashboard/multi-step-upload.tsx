@@ -1,199 +1,217 @@
-'use client'
-import { useState, useCallback } from 'react'
-import { Upload, FileText, Check } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Progress } from '@/components/ui/progress'
-import { useToast } from '@/hooks/use-toast'
-import { ReceiptDetails } from './reciept-details'
+"use client";
+import { useState, useCallback, useEffect } from "react";
+import { Upload, FileText, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Progress } from "@/components/ui/progress";
+import { useToast } from "@/hooks/use-toast";
+import { ReceiptDetails } from "./reciept-details";
+import { createBillingTask, getTaskTrackingInfo } from "@/lib/extractClient";
+import { TrackingData } from "@/types/extract";
 
-type UploadStep = 1 | 2 | 3 | 4 | 5
-// type FileStatus = 'idle' | 'selected' | 'uploading' | 'completed'
+type UploadStep =
+  | "idle"
+  | "selected"
+  | "uploading"
+  | "processing"
+  | "completed";
 
 interface UploadedFile {
-  name: string
-  size: string
-  type: string
-  file: File
+  name: string;
+  size: string;
+  type: string;
+  file: File;
 }
 
 interface MultiStepUploadProps {
-  isOpen: boolean
-  onClose: () => void
-}
-
-interface UploadResponse {
-  fileId: string
-  merchantName: string
-  expenseDate: string
-  total: number
-  tax: number
-  invoiceNo: string
+  isOpen: boolean;
+  onClose: () => void;
 }
 
 export function MultiStepUpload({ isOpen, onClose }: MultiStepUploadProps) {
-  const [currentStep, setCurrentStep] = useState<UploadStep>(1)
-  // const [fileStatus, setFileStatus] = useState<FileStatus>('idle')
-  const [selectedFile, setSelectedFile] = useState<UploadedFile | null>(null)
-  const [uploadProgress, setUploadProgress] = useState(0)
-  const [isDragging, setIsDragging] = useState(false)
-  const [uploadResponse, setUploadResponse] = useState<UploadResponse | null>(null)
-  const { toast } = useToast()
+  const [uploadStep, setUploadStep] = useState<UploadStep>("idle");
+  const [selectedFile, setSelectedFile] = useState<UploadedFile | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [trackingData, setTrackingData] = useState<TrackingData | null>(null);
+  const [taskId, setTaskId] = useState<string|null>(null)
+
+  const { toast } = useToast();
 
   const handleFile = useCallback((file: File) => {
     setSelectedFile({
       name: file.name,
       size: `${(file.size / 1024).toFixed(0)}kb`,
       type: file.type,
-      file: file
-    })
-    // setFileStatus('selected')
-    setCurrentStep(2)
-    handleUpload(file)
-  }, [])
+      file: file,
+    });
+    setUploadStep("selected");
+  }, []);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
+    const file = event.target.files?.[0];
     if (file) {
-      handleFile(file)
+      handleFile(file);
     }
-  }
+  };
 
   const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setIsDragging(true)
-  }
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
 
   const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setIsDragging(false)
-  }
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    e.stopPropagation()
-  }
+    e.preventDefault();
+    e.stopPropagation();
+  };
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setIsDragging(false)
-    const file = e.dataTransfer.files?.[0]
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
     if (file) {
-      handleFile(file)
+      handleFile(file);
     }
-  }
+  };
 
-  const handleUpload = async (file: File) => {
-    setCurrentStep(3)
-    // setFileStatus('uploading')
-    setUploadProgress(0)
+  const handleUpload = async () => {
+    if (!selectedFile) return;
 
-    const formData = new FormData()
-    formData.append('image', file)
+    setUploadStep("uploading");
+    setTrackingData(null);
 
     try {
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      })
-
-      if (!response.ok) {
-        throw new Error('Upload failed')
-      }
-
-      const reader = response.body?.getReader()
-      const contentLength = +response.headers.get('Content-Length')!
-      let receivedLength = 0
-
-      while(true) {
-        const { done, value } = await reader!.read()
-
-        if (done) {
-          break
-        }
-
-        receivedLength += value.length
-        setUploadProgress(Math.round((receivedLength / contentLength) * 100))
-      }
-
-      // const data: UploadResponse = await response.json()
-      // setFileStatus('completed')
-      setCurrentStep(5)
-      setUploadResponse({
-        fileId: 'asdasda',
-        merchantName: 'dadsadad',
-        expenseDate: '23232323',
-        total: 3232,
-        tax: 23232,
-        invoiceNo: '23232'
-      })
-
+      const response = await createBillingTask(selectedFile.file);
+      setTaskId(response.requestId)
+      setTrackingData(response.trackingData);
+      setUploadStep("processing");
       toast({
-        title: 'File uploaded successfully',
-        // description: `File ID: ${data.fileId}`,
-      })
+        title: "File Processing successfully",
+      });
     } catch (error) {
-      console.error('Upload error:', error)
+      // console.error("Upload error:", error)
       toast({
-        title: 'Upload failed',
-        description: 'There was an error uploading your file. Please try again.',
-        variant: 'destructive',
-      })
-      resetUpload()
+        title: "Upload failed",
+        description:
+          error instanceof Error
+            ? error.message
+            : "There was an error uploading your file. Please try again.",
+        variant: "destructive",
+      });
+      resetUpload();
     }
-  }
+  };
 
   const resetUpload = () => {
-    setCurrentStep(1)
-    // setFileStatus('idle')
-    setSelectedFile(null)
-    setUploadProgress(0)
-    setUploadResponse(null)
-  }
+    setUploadStep("idle");
+    setSelectedFile(null);
+    setTrackingData(null);
+  };
+
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+
+    if (uploadStep === "processing") {
+      const fetchTrackingData = async () => {
+        try {
+          if (!taskId) throw 'No Task Found'
+          const response = await getTaskTrackingInfo(taskId)
+          setTrackingData(response);
+
+          if (response.progress.percentageComplete === 100) {
+            setUploadStep("completed");
+            clearInterval(intervalId);
+          }
+        } catch (error) {
+          console.error("Error fetching tracking data:", error);
+          toast({
+            title: "Error",
+            description: "Failed to fetch tracking data. Please try again.",
+            variant: "destructive",
+          });
+          clearInterval(intervalId);
+        }
+      };
+
+      fetchTrackingData(); // Fetch immediately
+      intervalId = setInterval(fetchTrackingData, 2000); // Then every 2 seconds
+    }
+
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [uploadStep, toast]);
 
   const getFileIcon = (fileType: string) => {
-    if (fileType.startsWith('image/')) {
-      return <Upload className="h-5 w-5" />
+    if (fileType.startsWith("image/")) {
+      return <Upload className="h-5 w-5" />;
     } else {
-      return <FileText className="h-5 w-5" />
+      return <FileText className="h-5 w-5" />;
     }
-  }
+  };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => {
-      if (!open) {
-        onClose()
-        resetUpload()
-      }
-    }}>
-      <DialogContent className={`${currentStep === 5 ? 'sm:max-w-xl' : 'sm:max-w-md'} p-0 bg-white`}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) {
+          onClose();
+          resetUpload();
+        }
+      }}
+    >
+      <DialogContent
+        className={`${
+          uploadStep === "completed" ? "sm:max-w-xl" : "sm:max-w-md"
+        } p-0`}
+      >
         <DialogHeader className="p-6 pb-0">
           <DialogTitle>
-            {currentStep === 5 ? 'Receipt Details' : 'Media Upload'}
+            {uploadStep === "completed" ? "Receipt Details" : "Media Upload"}
           </DialogTitle>
         </DialogHeader>
-        <div className={`${currentStep === 5 ? '' : 'p-6'}`}>
-          {currentStep !== 5 && (
+        <div className={`${uploadStep === "completed" ? "" : "p-6"}`}>
+          {uploadStep !== "completed" && (
             <div className="text-sm text-muted-foreground mb-4">
-              Add your documents or images here, and you can upload up to 5 files max
+              Add your documents or images here, and you can upload up to 5
+              files max
             </div>
           )}
 
-          {currentStep === 1 && (
-            <div 
-              className={`border-2 ${isDragging ? 'border-blue-500 bg-blue-50' : 'border-dashed'} rounded-lg p-6 text-center space-y-4 transition-colors duration-300`}
+          {uploadStep === "idle" && (
+            <div
+              className={`border-2 ${
+                isDragging ? "border-blue-500 bg-blue-50" : "border-dashed"
+              } rounded-lg p-6 text-center space-y-4 transition-colors duration-300`}
               onDragEnter={handleDragEnter}
               onDragLeave={handleDragLeave}
               onDragOver={handleDragOver}
               onDrop={handleDrop}
             >
               <div className="flex flex-col items-center gap-2">
-                <Upload className={`h-8 w-8 ${isDragging ? 'text-blue-500' : 'text-gray-400'}`} />
+                <Upload
+                  className={`h-8 w-8 ${
+                    isDragging ? "text-blue-500" : "text-gray-400"
+                  }`}
+                />
                 <div className="flex gap-1">
-                  <span>{isDragging ? 'Drop your file here' : 'Drag your file(s) or'}</span>
+                  <span>
+                    {isDragging
+                      ? "Drop your file here"
+                      : "Drag your file(s) or"}
+                  </span>
                   {!isDragging && (
                     <label className="text-blue-500 cursor-pointer hover:underline">
                       browse
@@ -213,93 +231,93 @@ export function MultiStepUpload({ isOpen, onClose }: MultiStepUploadProps) {
             </div>
           )}
 
-          {currentStep === 2 && selectedFile && (
+          {uploadStep === "selected" && selectedFile && (
             <div className="border rounded-lg p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   {getFileIcon(selectedFile.type)}
                   <div>
                     <div className="font-medium">{selectedFile.name}</div>
-                    <div className="text-sm text-muted-foreground">{selectedFile.size}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {currentStep === 3 && (
-            <div className="space-y-4">
-              <div className="border rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    {selectedFile && getFileIcon(selectedFile.type)}
-                    <div>
-                      <div className="font-medium">{selectedFile?.name}</div>
-                      <div className="text-sm text-muted-foreground">Uploading...</div>
+                    <div className="text-sm text-muted-foreground">
+                      {selectedFile.size}
                     </div>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={resetUpload}
-                  >
-                    Cancel
-                  </Button>
                 </div>
-                <Progress value={uploadProgress} className="mt-2" />
-              </div>
-            </div>)}
-
-          {currentStep === 4 && selectedFile && (
-            <div className="border rounded-lg p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  {getFileIcon(selectedFile.type)}
-                  <div>
-                    <div className="font-medium">{selectedFile.name}</div>
-                    <div className="text-sm text-muted-foreground">{selectedFile.size}</div>
-                  </div>
-                </div>
-                <Check className="h-5 w-5 text-green-500" />
+                <Button onClick={handleUpload}>Upload</Button>
               </div>
             </div>
           )}
 
-          {currentStep === 5 && uploadResponse && selectedFile && (
-            <ReceiptDetails
-              receiptData={{
-                ...uploadResponse,
-                file: selectedFile.file
-              }}
-            />
+          {uploadStep === "uploading" && (
+            <div className="flex flex-col items-center justify-center space-y-4">
+              <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+              <p className="text-sm font-medium">Uploading file...</p>
+            </div>
           )}
 
-          {currentStep !== 5 && (
+          {uploadStep === "processing" && trackingData && (
+            <div className="space-y-4">
+              <Progress
+                value={trackingData.progress.percentageComplete}
+                className="w-full"
+              />
+              <div className="text-sm font-medium">
+                {trackingData.currentStage.split("_").join(" ")} (
+                {trackingData.progress.percentageComplete}%)
+              </div>
+              <div className="space-y-2">
+                {Object.entries(trackingData.stages).map(([stage, data]) => (
+                  <div key={stage} className="flex items-center space-x-2">
+                    <div
+                      className={`w-2 h-2 rounded-full ${getStatusColor(
+                        data.status
+                      )}`}
+                    />
+                    <span className="capitalize">
+                      {stage.split(/(?=[A-Z])/).join(" ")}
+                    </span>
+                    {data.status === 'IN_PROGRESS' && (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* {uploadStep === "completed" &&
+            selectedFile && (
+              <ReceiptDetails
+                receiptData={{
+                  ...trackingData.receiptDetails,
+                  file: selectedFile.file,
+                }}
+              />
+            )} */}
+
+          {uploadStep !== "completed" && (
             <>
               <div className="text-xs text-muted-foreground mt-4">
-                Supported file types: Images (.jpg, .jpeg, .png, .svg, .gif) and Documents (.pdf, .doc, .docx, .xls, .xlsx, .ppt, .pptx)
-              </div>
-
-              <div className="border-t pt-4 mt-4">
-                <div className="flex items-center">
-                  <span className="text-sm font-medium">Upload from URL</span>
-                </div>
-                <div className="mt-2 flex gap-2">
-                  <input
-                    type="text"
-                    placeholder="Add file URL"
-                    className="flex-1 rounded-md border px-3 py-2 text-sm"
-                  />
-                  <Button variant="outline" size="sm">
-                    Upload
-                  </Button>
-                </div>
+                Supported file types: Images (.jpg, .jpeg, .png, .svg, .gif) and
+                Documents (.pdf, .doc, .docx, .xls, .xlsx, .ppt, .pptx)
               </div>
             </>
           )}
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
 
+function getStatusColor(status: string): string {
+  switch (status) {
+    case "completed":
+      return "bg-green-500";
+    case "in_progress":
+      return "bg-blue-500";
+    case "pending":
+      return "bg-gray-300";
+    default:
+      return "bg-gray-300";
+  }
+}
