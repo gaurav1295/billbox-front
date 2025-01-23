@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-config
+data:
+  API_BASE_URL: "http://api-service"  # Points to API service in k8s
+  API_BASE_URL1: "http://frontend-service"  # Points to frontend service

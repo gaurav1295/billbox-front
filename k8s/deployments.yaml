@@ -15,16 +15,3 @@ spec:
       containers:
       - name: frontend
         image: gcr.io/PROJECT_ID/billbox-frontend:latest
-
-# frontend/k8s/service.yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: billbox-frontend-service
-spec:
-  type: LoadBalancer
-  ports:
-  - port: 80
-    targetPort: 3000
-  selector:
-    app: billbox-frontend
