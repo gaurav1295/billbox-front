@@ -16,10 +16,8 @@ export async function GET() {
     );
 
     const data = await response.json();
-    console.log(data)
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Error in latest-bill-list:', error);
     return new NextResponse('Internal Server Error', { status: 500 });
   }
 }

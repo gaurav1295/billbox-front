@@ -1,24 +1,24 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-export async function POST(request: Request) {
+export async function GET(
+  request: Request,
+  { params }: { params: { taskId: string } }
+) {
   try {
     const { getToken } = auth();
     const token = await getToken();
     
-    const formData = await request.formData();
-    const file = formData.get('file');
+    const taskId = params.taskId;
 
-    if (!file) {
-      return new NextResponse('No file provided', { status: 400 });
+    if (!taskId) {
+      return new NextResponse('No taskId provided', { status: 400 });
     }
 
-    const response = await fetch(`${process.env.API_BASE_URL}/extract/extract-text-queue`, {
-      method: 'POST',
+    const response = await fetch(`${process.env.API_BASE_URL}/extract/status/${taskId}`, {
       headers: {
         'Authorization': `Bearer ${token}`,
       },
-      body: formData,
     });
 
     const data = await response.json();

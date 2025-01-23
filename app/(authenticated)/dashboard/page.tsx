@@ -1,43 +1,21 @@
+"use client"
+import { ExpenseCard } from "@/components/dashboard/cards/expense-card";
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ExpenseCard } from "@/components/dashboard/expense-card";
 import { ExpenseStatistics } from "@/components/dashboard/expense-statistics";
 import { FileUpload } from "@/components/dashboard/file-upload";
 import { FloatingUploadButton } from "@/components/dashboard/floating-upload-button";
 import { Header } from "@/components/dashboard/header";
 import { MonthlyActivity } from "@/components/dashboard/statistics";
-import { TransactionsList } from "@/components/dashboard/transaction-list";
+import { Transactions } from "@/components/dashboard/transaction/transaction";
+import { TransactionListError } from "@/components/dashboard/transaction/transaction-error";
+import { TransactionsList } from "@/components/dashboard/transaction/transaction-list";
 import { ErrorBoundary } from "@/components/ErrorBoundry";
 import { Skeleton } from "@/components/ui/skeleton";
-import { fetchDashboardData, getBillMonthlySumamry, getLatestBillList } from "@/lib/billClient";
+import { useTransactions } from "@/hooks/use-transaction";
+import { fetchDashboardData, getBillMonthlySumamry } from "@/lib/billClient";
+import { AlertCircle } from "lucide-react";
 import { Suspense } from "react";
 
-async function ExpenseCards() {
-  try {
-    const date = new Date()
-    const data = await getBillMonthlySumamry("bill_date", date.getMonth() + 1, date.getFullYear());
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-        <ExpenseCard {...data.currentMonthSummary} />
-        <ExpenseCard {...data.lastMonthSummary} isPending={true} />
-        <div className="hidden md:block">
-          <FileUpload />
-        </div>
-      </div>
-    );
-  } catch (error) {
-    throw new Error("Failed to load expense summary");
-  }
-}
-
-async function Transactions() {
-  try {
-    const data = await getLatestBillList();
-
-    return <TransactionsList transactions={data.bills} />;
-  } catch (error) {
-    throw new Error("Failed to load transactions");
-  }
-}
 
 async function MonthlyActivityChart() {
   try {
@@ -84,11 +62,11 @@ export default async function Dashboard() {
           <div className="max-w-7xl mx-auto space-y-8">
             <ErrorBoundary>
               <Suspense fallback={<ExpenseCardsSkeleton />}>
-                <ExpenseCards />
+                <ExpenseCard/>
               </Suspense>
             </ErrorBoundary>
 
-            <ErrorBoundary>
+            <ErrorBoundary fallback={<TransactionListError />}>
               <Suspense fallback={<TransactionsListSkeleton />}>
                 <Transactions />
               </Suspense>

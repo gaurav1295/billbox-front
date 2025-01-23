@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const { API_BASE_URL, API_BASE_URL1 } = process.env
+const { API_BASE_URL } = process.env
 
 /* Axios client instance for API interactions, this set up ensures the
 base url for our api gateway will be used and also that the session cookie

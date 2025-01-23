@@ -1,7 +1,8 @@
 import { auth } from "@clerk/nextjs/server";
 import axiosApiClient from "./apiClient";
+import { TrackingData } from "@/types/extract";
 
-export type BillFetchCriteria = "bill_date" | "created_at";
+export type BillFetchCriteria = "bill_date" | "created_date";
 
 type MonthlyValues = {
   month: string;
@@ -27,6 +28,7 @@ export type BillListMeta = {
   category: string; // Main category (e.g., "Tax Saving", "Reimburse")
   subCategory: string; // Sub-category of the bill (e.g., "Books & Periodicals")
   amount: number; // Amount associated with the bill
+  tracking: TrackingData
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -35,36 +37,29 @@ export const getBillMonthlySumamry = async (
   month: number,
   year: number
 ): Promise<BillMonthlySummary> => {
-  const { getToken } = auth();
-  const token = await getToken();
-
   const filterString = new URLSearchParams({
     criteria,
     month: month.toString(),
     year: year.toString(),
   }).toString();
 
-  const url = `/bill/monthly-summary?${filterString}`;
+  const url = `/api/bill/monthly-summary?${filterString}`;
 
-  const { data } = await axiosApiClient.get(url, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const { data } = await axiosApiClient.get(url);
 
   return data;
 };
 
 export const getLatestBillList = async (): Promise<{bills: Array<BillListMeta>}> => {
-  const { getToken } = auth();
-  const token = await getToken();
 
-  const url = `/bill/lastest-bill-list`;
-
-  const { data } = await axiosApiClient.get(url, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const url = `/api/bill/latest-bill-list`;
+  
+  const { data } = await axiosApiClient.get(url);
 
   return data;
 };
+
+
 // Simulating API delay
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 

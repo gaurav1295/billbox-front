@@ -1,46 +1,46 @@
-"use client";
-import { useState, useCallback, useEffect } from "react";
-import { Upload, FileText, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+"use client"
+import { useState, useCallback, useEffect } from "react"
+import { Upload, FileText, Loader2 } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Progress } from "@/components/ui/progress";
-import { useToast } from "@/hooks/use-toast";
-import { ReceiptDetails } from "./reciept-details";
-import { createBillingTask, getTaskTrackingInfo } from "@/lib/extractClient";
-import { TrackingData } from "@/types/extract";
+} from "@/components/ui/dialog"
+import { Progress } from "@/components/ui/progress"
+import { useToast } from "@/hooks/use-toast"
+import { ReceiptDetails } from "./reciept-details"
+import { createBillingTask, getTaskTrackingInfo } from "@/lib/extractClient"
+import { TrackingData } from "@/types/extract"
 
 type UploadStep =
   | "idle"
   | "selected"
   | "uploading"
   | "processing"
-  | "completed";
+  | "completed"
 
 interface UploadedFile {
-  name: string;
-  size: string;
-  type: string;
-  file: File;
+  name: string
+  size: string
+  type: string
+  file: File
 }
 
 interface MultiStepUploadProps {
-  isOpen: boolean;
-  onClose: () => void;
+  isOpen: boolean
+  onClose: () => void
 }
 
 export function MultiStepUpload({ isOpen, onClose }: MultiStepUploadProps) {
-  const [uploadStep, setUploadStep] = useState<UploadStep>("idle");
-  const [selectedFile, setSelectedFile] = useState<UploadedFile | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [trackingData, setTrackingData] = useState<TrackingData | null>(null);
-  const [taskId, setTaskId] = useState<string|null>(null)
+  const [uploadStep, setUploadStep] = useState<UploadStep>("idle")
+  const [selectedFile, setSelectedFile] = useState<UploadedFile | null>(null)
+  const [isDragging, setIsDragging] = useState(false)
+  const [trackingData, setTrackingData] = useState<TrackingData | null>(null)
+  const [taskId, setTaskId] = useState<string | null>(null)
 
-  const { toast } = useToast();
+  const { toast } = useToast()
 
   const handleFile = useCallback((file: File) => {
     setSelectedFile({
@@ -48,58 +48,58 @@ export function MultiStepUpload({ isOpen, onClose }: MultiStepUploadProps) {
       size: `${(file.size / 1024).toFixed(0)}kb`,
       type: file.type,
       file: file,
-    });
-    setUploadStep("selected");
-  }, []);
+    })
+    setUploadStep("selected")
+  }, [])
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+    const file = event.target.files?.[0]
     if (file) {
-      handleFile(file);
+      handleFile(file)
     }
-  };
+  }
 
   const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(true);
-  };
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(true)
+  }
 
   const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-  };
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(false)
+  }
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
+    e.preventDefault()
+    e.stopPropagation()
+  }
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-    const file = e.dataTransfer.files?.[0];
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(false)
+    const file = e.dataTransfer.files?.[0]
     if (file) {
-      handleFile(file);
+      handleFile(file)
     }
-  };
+  }
 
   const handleUpload = async () => {
-    if (!selectedFile) return;
+    if (!selectedFile) return
 
-    setUploadStep("uploading");
-    setTrackingData(null);
+    setUploadStep("uploading")
+    setTrackingData(null)
 
     try {
-      const response = await createBillingTask(selectedFile.file);
+      const response = await createBillingTask(selectedFile.file)
       setTaskId(response.taskId)
-      setTrackingData(response.trackingData);
-      setUploadStep("processing");
+      setTrackingData(response.trackingData)
+      setUploadStep("processing")
       toast({
         title: "File Processing successfully",
-      });
+      })
     } catch (error) {
       // console.error("Upload error:", error)
       toast({
@@ -109,67 +109,67 @@ export function MultiStepUpload({ isOpen, onClose }: MultiStepUploadProps) {
             ? error.message
             : "There was an error uploading your file. Please try again.",
         variant: "destructive",
-      });
-      resetUpload();
+      })
+      resetUpload()
     }
-  };
+  }
 
   const resetUpload = () => {
-    setUploadStep("idle");
-    setSelectedFile(null);
-    setTrackingData(null);
-  };
+    setUploadStep("idle")
+    setSelectedFile(null)
+    setTrackingData(null)
+  }
 
   useEffect(() => {
-    let intervalId: NodeJS.Timeout;
+    let intervalId: NodeJS.Timeout
 
     if (uploadStep === "processing") {
       const fetchTrackingData = async () => {
         try {
-          if (!taskId) throw 'No Task Found'
+          if (!taskId) throw "No Task Found"
           const response = await getTaskTrackingInfo(taskId)
           console.log(response)
-          // setTrackingData(response);
+          setTrackingData(response)
 
-          // if (response.progress.percentageComplete === 100) {
-          //   setUploadStep("completed");
-          //   clearInterval(intervalId);
-          // }
+          if (response.progress.percentageComplete === 100) {
+            setUploadStep("completed")
+            clearInterval(intervalId)
+          }
         } catch (error) {
-          console.error("Error fetching tracking data:", error);
+          console.error("Error fetching tracking data:", error)
           toast({
             title: "Error",
             description: "Failed to fetch tracking data. Please try again.",
             variant: "destructive",
-          });
-          clearInterval(intervalId);
+          })
+          clearInterval(intervalId)
         }
-      };
+      }
 
-      fetchTrackingData(); // Fetch immediately
-      intervalId = setInterval(fetchTrackingData, 2000); // Then every 2 seconds
+      fetchTrackingData() // Fetch immediately
+      intervalId = setInterval(fetchTrackingData, 2000) // Then every 2 seconds
     }
 
     return () => {
-      if (intervalId) clearInterval(intervalId);
-    };
-  }, [uploadStep, toast]);
+      if (intervalId) clearInterval(intervalId)
+    }
+  }, [uploadStep, toast])
 
   const getFileIcon = (fileType: string) => {
     if (fileType.startsWith("image/")) {
-      return <Upload className="h-5 w-5" />;
+      return <Upload className="h-5 w-5" />
     } else {
-      return <FileText className="h-5 w-5" />;
+      return <FileText className="h-5 w-5" />
     }
-  };
+  }
 
   return (
     <Dialog
       open={isOpen}
       onOpenChange={(open) => {
         if (!open) {
-          onClose();
-          resetUpload();
+          onClose()
+          resetUpload()
         }
       }}
     >
@@ -277,7 +277,7 @@ export function MultiStepUpload({ isOpen, onClose }: MultiStepUploadProps) {
                     <span className="capitalize">
                       {stage.split(/(?=[A-Z])/).join(" ")}
                     </span>
-                    {data.status === 'IN_PROGRESS' && (
+                    {data.status === "IN_PROGRESS" && (
                       <Loader2 className="h-3 w-3 animate-spin" />
                     )}
                   </div>
@@ -286,15 +286,14 @@ export function MultiStepUpload({ isOpen, onClose }: MultiStepUploadProps) {
             </div>
           )}
 
-          {/* {uploadStep === "completed" &&
-            selectedFile && (
-              <ReceiptDetails
-                receiptData={{
-                  ...trackingData.receiptDetails,
-                  file: selectedFile.file,
-                }}
-              />
-            )} */}
+          {/* {uploadStep === "completed" && selectedFile && (
+            <ReceiptDetails
+              receiptData={{
+                // ...trackingData.receiptDetails,
+                file: selectedFile.file,
+              }}
+            />
+          )} */}
 
           {uploadStep !== "completed" && (
             <>
@@ -307,18 +306,18 @@ export function MultiStepUpload({ isOpen, onClose }: MultiStepUploadProps) {
         </div>
       </DialogContent>
     </Dialog>
-  );
+  )
 }
 
 function getStatusColor(status: string): string {
   switch (status) {
-    case "completed":
-      return "bg-green-500";
-    case "in_progress":
-      return "bg-blue-500";
-    case "pending":
-      return "bg-gray-300";
+    case "COMPLETED":
+      return "bg-green-500"
+    case "IN_PROGRESS":
+      return "bg-blue-500"
+    case "PENDING":
+      return "bg-gray-300"
     default:
-      return "bg-gray-300";
+      return "bg-gray-300"
   }
 }
